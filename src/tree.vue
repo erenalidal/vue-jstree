@@ -261,6 +261,7 @@
                     return
                 }
                 isDragValidPromise.then((isDragValid) => {
+                    console.log("isDragValid", isDragValid);
                     if (self.draggedItem && isDragValid) {
                         if (self.draggedItem.parentItem === oriItem[self.childrenFieldName]
                             || self.draggedItem.item === oriItem

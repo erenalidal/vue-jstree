@@ -255,7 +255,7 @@
                 if (!this.draggable || !!oriItem.dropDisabled)
                     return false
 
-                const isDragValidPromise = new Promise((resolve) => self.$emit("item-drop-before", oriNode, oriItem, !self.draggedItem ? undefined : self.draggedItem.item, e, resolve, reject))
+                const isDragValidPromise = new Promise((resolve, reject) => self.$emit("item-drop-before", oriNode, oriItem, !self.draggedItem ? undefined : self.draggedItem.item, e, resolve, reject))
 
                 if (!this.draggedElm || this.draggedElm === e.target || this.draggedElm.contains(e.target)) {
                     return

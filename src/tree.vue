@@ -250,37 +250,36 @@
                 this.draggedElm = undefined
                 this.$emit("item-drag-end", oriNode, oriItem, e)
             },
-            onItemDrop(e, oriNode, oriItem) {
-                const self = this;
+            async onItemDrop(e, oriNode, oriItem) {
                 if (!this.draggable || !!oriItem.dropDisabled)
                     return false
 
-                const isDragValidPromise = new Promise((resolve, reject) => self.$emit("item-drop-before", oriNode, oriItem, !self.draggedItem ? undefined : self.draggedItem.item, e, resolve, reject))
+                const draggedItem = this.draggedItem;
 
+                const isDragValidPromise = new Promise((resolve) => this.$emit("item-drop-before", oriNode, oriItem, !draggedItem ? undefined : draggedItem.item, e, resolve));
                 if (!this.draggedElm || this.draggedElm === e.target || this.draggedElm.contains(e.target)) {
                     return
                 }
-                isDragValidPromise.then((isDragValid) => {
-                    console.log("isDragValid", isDragValid);
-                    if (self.draggedItem && isDragValid) {
-                        if (self.draggedItem.parentItem === oriItem[self.childrenFieldName]
-                            || self.draggedItem.item === oriItem
-                            || (oriItem[self.childrenFieldName] && oriItem[self.childrenFieldName].findIndex(t => t.id === self.draggedItem.item.id) !== -1)) {
-                            return;
-                        }
-                        if (!!oriItem[self.childrenFieldName]) {
-                            oriItem[self.childrenFieldName].push(self.draggedItem.item)
-                        } else {
-                            oriItem[self.childrenFieldName] = [self.draggedItem.item]
-                        }
-                        oriItem.opened = true
-                        var draggedItem = self.draggedItem
-                        self.$nextTick(() => {
-                            draggedItem.parentItem.splice(draggedItem.index, 1)
-                        })
-                        self.$emit("item-drop", oriNode, oriItem, draggedItem.item, e)
+                const isDragValid = await isDragValidPromise;
+
+                if (draggedItem && isDragValid) {
+                    if (draggedItem.parentItem === oriItem[this.childrenFieldName]
+                        || draggedItem.item === oriItem
+                        || (oriItem[this.childrenFieldName] && oriItem[this.childrenFieldName].findIndex(t => t.id === draggedItem.item.id) !== -1)) {
+                        return;
                     }
-                });
+                    if (!!oriItem[this.childrenFieldName]) {
+                        oriItem[this.childrenFieldName].push(draggedItem.item)
+                    } else {
+                        oriItem[this.childrenFieldName] = [draggedItem.item]
+                    }
+                    oriItem.opened = true
+                    this.$nextTick(() => {
+                        draggedItem.parentItem.splice(draggedItem.index, 1)
+                    })
+                    this.$emit("item-drop", oriNode, oriItem, draggedItem.item, e)
+                }
+
             }
         },
         created() {

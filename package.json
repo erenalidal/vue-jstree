@@ -1,5 +1,5 @@
 {
-  "name": "vue-jstree",
+  "name": "vue-jstree-promise",
   "version": "2.1.6",
   "description": "a tree plugin for vue2",
   "keywords": [

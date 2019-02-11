@@ -251,30 +251,35 @@
                 this.$emit("item-drag-end", oriNode, oriItem, e)
             },
             onItemDrop(e, oriNode, oriItem) {
+                const self = this;
                 if (!this.draggable || !!oriItem.dropDisabled)
                     return false
-                this.$emit("item-drop-before", oriNode, oriItem, !this.draggedItem ? undefined : this.draggedItem.item, e)
+
+                const isDragValidPromise = new Promise((resolve) => self.$emit("item-drop-before", oriNode, oriItem, !self.draggedItem ? undefined : self.draggedItem.item, e, resolve, reject))
+
                 if (!this.draggedElm || this.draggedElm === e.target || this.draggedElm.contains(e.target)) {
                     return
                 }
-                if (this.draggedItem) {
-                    if (this.draggedItem.parentItem === oriItem[this.childrenFieldName]
-                            || this.draggedItem.item === oriItem
-                            || (oriItem[this.childrenFieldName] && oriItem[this.childrenFieldName].findIndex(t => t.id === this.draggedItem.item.id) !== -1)) {
-                        return;
+                isDragValidPromise.then((isDragValid) => {
+                    if (self.draggedItem && isDragValid) {
+                        if (self.draggedItem.parentItem === oriItem[self.childrenFieldName]
+                            || self.draggedItem.item === oriItem
+                            || (oriItem[self.childrenFieldName] && oriItem[self.childrenFieldName].findIndex(t => t.id === self.draggedItem.item.id) !== -1)) {
+                            return;
+                        }
+                        if (!!oriItem[self.childrenFieldName]) {
+                            oriItem[self.childrenFieldName].push(self.draggedItem.item)
+                        } else {
+                            oriItem[self.childrenFieldName] = [self.draggedItem.item]
+                        }
+                        oriItem.opened = true
+                        var draggedItem = self.draggedItem
+                        self.$nextTick(() => {
+                            draggedItem.parentItem.splice(draggedItem.index, 1)
+                        })
+                        self.$emit("item-drop", oriNode, oriItem, draggedItem.item, e)
                     }
-                    if (!!oriItem[this.childrenFieldName]) {
-                        oriItem[this.childrenFieldName].push(this.draggedItem.item)
-                    } else {
-                        oriItem[this.childrenFieldName] = [this.draggedItem.item]
-                    }
-                    oriItem.opened = true
-                    var draggedItem = this.draggedItem
-                    this.$nextTick(() => {
-                        draggedItem.parentItem.splice(draggedItem.index, 1)
-                    })
-                    this.$emit("item-drop", oriNode, oriItem, draggedItem.item, e)
-                }
+                });
             }
         },
         created() {

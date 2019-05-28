@@ -1,5 +1,6 @@
 <template>
     <li role="treeitem"
+        v-show="!model.hide"
         :class="classes"
         :draggable="draggable&&!_self.model.dragDisabled"
         @dragstart.stop="onItemDragStart($event, _self, _self.model)"
@@ -17,7 +18,7 @@
                 <span v-html="model[textFieldName]"></span>
             </slot>
         </div>
-        <ul role="group" ref="group" class="tree-children" v-if="isFolder" :style="groupStyle">
+        <ul role="group" ref="group" class="tree-children" v-if="isFolder && model.opened" :style="groupStyle">
             <tree-item v-for="(child, index) in model[childrenFieldName]"
                        :key="index"
                        :data="child"
